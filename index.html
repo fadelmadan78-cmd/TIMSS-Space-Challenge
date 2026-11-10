@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>مسابقة أبطال TIMSS</title>
+<style>
+:root{--navy:#082b68;--blue:#0e4da7;--gold:#ffbf23;--paper:#f5f9ff;--green:#159447;--red:#cc3344}
+*{box-sizing:border-box}body{margin:0;font-family:Tahoma,Arial,sans-serif;background:radial-gradient(circle at top,#dcecff,#eef5ff 50%,#f7fbff);color:#102446;min-height:100vh}
+.hidden{display:none!important}.screen{min-height:100vh}.home{display:flex;align-items:center;justify-content:center;padding:0;background:#061f4f}
+.home-art{position:relative;width:min(100vw,1536px);aspect-ratio:3/2;background:url('assets/home.png') center/contain no-repeat}
+.start-hotspot{position:absolute;left:35%;top:71%;width:33%;height:13%;border:0;background:transparent;cursor:pointer;border-radius:28px}
+.start-hotspot:focus{outline:4px solid rgba(255,255,255,.8)}
+.wrap{max-width:900px;margin:auto;padding:24px}.topbar{background:linear-gradient(135deg,#082b68,#0f4ea8);color:#fff;border-radius:0 0 28px 28px;padding:20px;text-align:center;box-shadow:0 14px 34px #082b6822}.topbar h1{margin:0;color:#ffd257}.card{background:#fff;border-radius:24px;padding:24px;margin:20px 0;box-shadow:0 14px 34px #0b2f6b18;border:1px solid #dfe9f8}.field{width:100%;padding:14px;border:2px solid #d7e3f3;border-radius:14px;font-size:18px;margin:8px 0;background:#fff}.btn{border:0;border-radius:15px;padding:13px 20px;font-size:18px;font-weight:800;cursor:pointer}.primary{background:linear-gradient(#ffd85f,#ffb51f);color:#0b2f6b;box-shadow:0 5px 0 #d99000}.secondary{background:#e9f0fa;color:#183764}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}.choice{background:#f7f9fc;border:2px solid #d5e0ef;color:#172b4d}.choice:hover{border-color:#7fa6db}.choice.correct{background:#dff6e7;border-color:#1d9f55}.choice.wrong{background:#fde2e5;border-color:#cf4255}.question-image{width:100%;max-height:520px;object-fit:contain;border-radius:18px;background:#fbf8f0;border:1px solid #eee}.question-stack{display:grid;gap:12px}.meta{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}.badge{background:#e9f1ff;color:#0a3b83;padding:8px 12px;border-radius:999px;font-weight:800}.feedback{margin-top:16px;padding:14px;border-radius:14px;font-size:17px;line-height:1.7}.feedback.ok{background:#e4f7eb;color:#116c39}.feedback.no{background:#fff0f1;color:#9d2233}.nav{display:flex;gap:12px;margin-top:18px}.nav>*{flex:1}.score{font-size:64px;font-weight:900;text-align:center;color:#0a3b83}.summary{text-align:center;font-size:20px}.small{color:#5b6e8d;font-size:14px}.section-title{font-size:26px;margin:8px 0}.math{color:#0c55bb}.science{color:#168242}
+@media(max-width:700px){.home{align-items:flex-start}.home-art{width:100vw}.wrap{padding:14px}.grid{grid-template-columns:1fr}.card{padding:18px}.section-title{font-size:22px}.choice{font-size:17px}.start-hotspot{left:31%;width:38%}}
+</style>
+</head>
+<body>
+<section id="home" class="screen home"><div class="home-art" aria-label="مسابقة أبطال TIMSS"><button id="start" class="start-hotspot" aria-label="ابدأ المسابقة"></button></div></section>
+<section id="app" class="screen hidden"><div class="topbar"><h1>مسابقة أبطال TIMSS</h1><div>الرياضيات والعلوم</div></div><div class="wrap">
+  <div id="info" class="card"><h2>بيانات الطالب</h2><select id="className" class="field"><option value="">اختر الصف</option><option>4/1</option><option>4/2</option><option>4/3</option><option>4/4</option></select><input id="studentName" class="field" placeholder="الاسم الرباعي"><div id="nameMsg" class="small"></div><button id="infoNext" class="btn primary" disabled>ابدأ الأسئلة</button></div>
+  <div id="quiz" class="card hidden"><div class="meta"><span id="counter" class="badge"></span><span id="section" class="badge"></span></div><h2 id="qTitle" class="section-title"></h2><div id="imageArea" class="question-stack"></div><div id="choices" class="grid"></div><div id="feedback"></div><div class="nav"><button id="prev" class="btn secondary">السابق</button><button id="next" class="btn primary" disabled>التالي</button></div></div>
+  <div id="result" class="card hidden"><h2 style="text-align:center">النتيجة النهائية</h2><div id="score" class="score"></div><p id="resultMsg" class="summary"></p><button id="restart" class="btn primary" style="display:block;margin:auto">إعادة المحاولة</button></div>
+</div></section>
+<script>
+const qs=s=>document.querySelector(s);
+const Q=[
+ {section:'رياضيات',title:'اقرأ التمثيل البياني ثم أجب.',images:['assets/math1_chart.jpg','assets/math1_options.jpg'],options:['أكثر بـ ٢','أكثر بـ ٤','أكثر بـ ٦','أكثر بـ ٨'],correct:3,explain:'عدد الأقلام الحمراء ١٦، وعدد الأقلام السوداء ٨؛ والفرق ١٦ − ٨ = ٨.'},
+ {section:'رياضيات',title:'اختر ناتج الجمع الصحيح.',images:['assets/math2.jpg'],options:['١٢٢٦٢','١٢٣٦٢','١٢١٦٢','١١١٦٢'],correct:0,explain:'٦٩٧١ + ٥٢٩١ = ١٢٢٦٢.'},
+ {section:'رياضيات',title:'ما كتلة القطة بالكيلوجرام؟',images:['assets/math3.jpg'],options:['٤ كجم','٥ كجم','٦ كجم','٧ كجم'],correct:1,explain:'كتلة أحمد مع القطة ٦٢ كجم وكتلة أحمد ٥٧ كجم، إذن كتلة القطة = ٦٢ − ٥٧ = ٥ كجم.'},
+ {section:'علوم',title:'أي من الصناديق س، ص، ع له أقل كتلة؟',images:['assets/science1.jpg'],options:['ع','ص','س','كل الصناديق الثلاثة لها نفس الكتلة'],correct:2,explain:'في الميزان الخاص بالصندوق س تكون كتلة ١٠ جرام أكبر منه، لذلك الصندوق س هو الأقل كتلة.'},
+ {section:'علوم',title:'لماذا تُصنع الغلاية وقدر الطبخ غالبًا من الألومنيوم؟',images:['assets/science2.jpg'],options:['الألومنيوم يذوب في الماء الساخن','الألومنيوم سهل الذوبان','الألومنيوم صعب التشكيل','الألومنيوم موصل جيد للحرارة'],correct:3,explain:'الألومنيوم موصل جيد للحرارة، لذلك ينقل الحرارة بكفاءة إلى الماء أو الطعام.'},
+ {section:'علوم',title:'أي من المواد التالية يمكن أن تصدأ؟',images:['assets/science3.jpg'],options:['رقاقات الخشب','قشات البلاستيك','الكرات الزجاجية','مسامير الحديد'],correct:3,explain:'الحديد يمكن أن يصدأ عند تعرضه للماء والأكسجين.'}
+];
+let S={name:'',cls:'',i:0,a:Array(Q.length).fill(null)};
+function show(id){['info','quiz','result'].forEach(x=>qs('#'+x).classList.add('hidden'));qs('#'+id).classList.remove('hidden')}
+qs('#start').onclick=()=>{qs('#home').classList.add('hidden');qs('#app').classList.remove('hidden')};
+function valid(){const parts=qs('#studentName').value.trim().split(/\s+/).filter(Boolean);const ok=qs('#className').value&&parts.length>=4;qs('#infoNext').disabled=!ok;qs('#nameMsg').textContent=qs('#studentName').value&&parts.length<4?'يرجى كتابة الاسم الرباعي.':''}
+qs('#studentName').oninput=valid;qs('#className').onchange=valid;
+qs('#infoNext').onclick=()=>{S.name=qs('#studentName').value.trim();S.cls=qs('#className').value;show('quiz');render()};
+function render(){const q=Q[S.i],a=S.a[S.i];qs('#counter').textContent=`السؤال ${S.i+1} من ${Q.length}`;qs('#section').textContent=q.section;qs('#section').className='badge '+(q.section==='رياضيات'?'math':'science');qs('#qTitle').textContent=q.title;qs('#imageArea').innerHTML=q.images.map(src=>`<img class="question-image" src="${src}" alt="صورة السؤال">`).join('');qs('#choices').innerHTML='';q.options.forEach((o,i)=>{const b=document.createElement('button');b.className='btn choice';b.textContent=o;if(a!==null){b.disabled=true;if(i===q.correct)b.classList.add('correct');else if(i===a)b.classList.add('wrong')}b.onclick=()=>{if(S.a[S.i]===null){S.a[S.i]=i;render()}};qs('#choices').appendChild(b)});if(a===null)qs('#feedback').innerHTML='';else{const ok=a===q.correct;qs('#feedback').innerHTML=`<div class="feedback ${ok?'ok':'no'}"><b>${ok?'إجابة صحيحة ✓':'إجابة غير صحيحة ✗'}</b><br>${q.explain}</div>`}qs('#prev').disabled=S.i===0;qs('#next').disabled=a===null;qs('#next').textContent=S.i===Q.length-1?'إنهاء المسابقة':'التالي'}
+qs('#prev').onclick=()=>{if(S.i>0){S.i--;render()}};
+qs('#next').onclick=()=>{if(S.i<Q.length-1){S.i++;render()}else finish()};
+function finish(){const score=S.a.reduce((n,a,i)=>n+(a===Q[i].correct?1:0),0);show('result');qs('#score').textContent=`${score} / ${Q.length}`;qs('#resultMsg').textContent=score===6?'ممتاز! حققت الدرجة الكاملة.':score>=4?'أداء رائع، واصل التحدي!':'محاولة جيدة، راجع التفسيرات وحاول مرة أخرى.'}
+qs('#restart').onclick=()=>location.reload();
+</script>
+</body></html>
