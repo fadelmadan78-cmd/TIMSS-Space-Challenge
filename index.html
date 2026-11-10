@@ -23,6 +23,11 @@
   <div id="result" class="card hidden"><h2 style="text-align:center">النتيجة النهائية</h2><div id="score" class="score"></div><p id="resultMsg" class="summary"></p><button id="restart" class="btn primary" style="display:block;margin:auto">إعادة المحاولة</button></div>
 </div></section>
 <script>
+const CONFIG={
+  SUPABASE_URL:"https://xafozswqbmydqfgurvla.supabase.co",
+  SUPABASE_ANON_KEY:"sb_publishable_0J6utd1edGTRV75-QHVEFw_FJw_c_Sn"
+};
+
 const qs=s=>document.querySelector(s);
 const Q=[
  {section:'رياضيات',title:'اقرأ التمثيل البياني ثم أجب.',images:['assets/math1_chart.jpg','assets/math1_options.jpg'],options:['أكثر بـ ٢','أكثر بـ ٤','أكثر بـ ٦','أكثر بـ ٨'],correct:3,explain:'عدد الأقلام الحمراء ١٦، وعدد الأقلام السوداء ٨؛ والفرق ١٦ − ٨ = ٨.'},
@@ -41,7 +46,47 @@ qs('#infoNext').onclick=()=>{S.name=qs('#studentName').value.trim();S.cls=qs('#c
 function render(){const q=Q[S.i],a=S.a[S.i];qs('#counter').textContent=`السؤال ${S.i+1} من ${Q.length}`;qs('#section').textContent=q.section;qs('#section').className='badge '+(q.section==='رياضيات'?'math':'science');qs('#qTitle').textContent=q.title;qs('#imageArea').innerHTML=q.images.map(src=>`<img class="question-image" src="${src}" alt="صورة السؤال">`).join('');qs('#choices').innerHTML='';q.options.forEach((o,i)=>{const b=document.createElement('button');b.className='btn choice';b.textContent=o;if(a!==null){b.disabled=true;if(i===q.correct)b.classList.add('correct');else if(i===a)b.classList.add('wrong')}b.onclick=()=>{if(S.a[S.i]===null){S.a[S.i]=i;render()}};qs('#choices').appendChild(b)});if(a===null)qs('#feedback').innerHTML='';else{const ok=a===q.correct;qs('#feedback').innerHTML=`<div class="feedback ${ok?'ok':'no'}"><b>${ok?'إجابة صحيحة ✓':'إجابة غير صحيحة ✗'}</b><br>${q.explain}</div>`}qs('#prev').disabled=S.i===0;qs('#next').disabled=a===null;qs('#next').textContent=S.i===Q.length-1?'إنهاء المسابقة':'التالي'}
 qs('#prev').onclick=()=>{if(S.i>0){S.i--;render()}};
 qs('#next').onclick=()=>{if(S.i<Q.length-1){S.i++;render()}else finish()};
-function finish(){const score=S.a.reduce((n,a,i)=>n+(a===Q[i].correct?1:0),0);show('result');qs('#score').textContent=`${score} / ${Q.length}`;qs('#resultMsg').textContent=score===6?'ممتاز! حققت الدرجة الكاملة.':score>=4?'أداء رائع، واصل التحدي!':'محاولة جيدة، راجع التفسيرات وحاول مرة أخرى.'}
+async function saveResult(score){
+  const p={
+    student_name:S.name,
+    class_name:S.cls,
+    score,
+    total:Q.length
+  };
+  for(let i=0;i<Q.length;i++){
+    const a=S.a[i];
+    p[`q${i+1}_answer`]=a===null?null:Q[i].options[a];
+    p[`q${i+1}_correct`]=a===Q[i].correct;
+  }
+  const r=await fetch(CONFIG.SUPABASE_URL+"/rest/v1/timss_space_results",{
+    method:"POST",
+    headers:{
+      apikey:CONFIG.SUPABASE_ANON_KEY,
+      "Content-Type":"application/json",
+      Prefer:"return=minimal"
+    },
+    body:JSON.stringify(p)
+  });
+  if(!r.ok){
+    let msg="";
+    try{msg=await r.text()}catch(e){}
+    throw new Error(msg||("HTTP "+r.status));
+  }
+}
+async function finish(){
+  const score=S.a.reduce((n,a,i)=>n+(a===Q[i].correct?1:0),0);
+  qs('#next').disabled=true;
+  qs('#next').textContent='جارٍ حفظ النتيجة...';
+  try{
+    await saveResult(score);
+  }catch(e){
+    console.error("Result save failed:",e);
+    alert("ظهرت النتيجة، لكن تعذر حفظها في قاعدة البيانات. يرجى إبلاغ المشرف.");
+  }
+  show('result');
+  qs('#score').textContent=`${score} / ${Q.length}`;
+  qs('#resultMsg').textContent=score===6?'ممتاز! حققت الدرجة الكاملة.':score>=4?'أداء رائع، واصل التحدي!':'محاولة جيدة، راجع التفسيرات وحاول مرة أخرى.';
+}
 qs('#restart').onclick=()=>location.reload();
 </script>
 </body></html>
